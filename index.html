@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Latihan Bahasa Jepang</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Latihan Bahasa Jepang</h1>
+    </header>
+
+    <main class="card">
+      <nav class="tabs">
+        <button class="tab active" data-type="hiragana">Hiragana</button>
+      </nav>
+
+      <div class="content">
+        <div class="left-panel">
+          <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+            <span class="badge green" id="benar">0</span>
+            <span class="badge red" id="salah">0</span>
+          </div>
+
+          <div class="question-box">
+            <div id="question" class="question">-</div>
+          </div>
+
+          <input type="text" id="answer" placeholder="Ketik romaji lalu Enter" autocomplete="off" disabled>
+        </div>
+
+        <div class="right-panel">
+          <div class="setting">
+            <label for="waktu">Waktu</label>
+            <select id="waktu">
+              <option value="6" selected>1 Menit</option>
+              <option value="120">2 Menit</option>
+              <option value="180">3 Menit</option>
+              <option value="180">4 Menit</option>
+              <option value="180">5 Menit</option>
+            </select>
+          </div>
+
+          <fieldset class="setting">
+            <legend>Mode</legend>
+            <label><input type="radio" name="mode" value="dasar" checked> Dasar</label>
+            <label><input type="radio" name="mode" value="tenten"> Tenten Maru</label>
+            <label><input type="radio" name="mode" value="youon"> Youon</label>
+          </fieldset>
+
+          <div class="buttons">
+            <button id="mulai">Mulai</button>
+            <button id="berhenti" disabled>Berhenti</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>
