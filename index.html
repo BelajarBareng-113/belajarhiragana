@@ -318,7 +318,7 @@ class LatihanJepangApp {
 
     this.state = {
       tabAktif: 'Hiragana',
-      modeAktif: 'Lengkap',
+      modeAktif: document.querySelector('input[name="mode"]:checked')?.value,
       diKuis: false,
       benar: 0,
       salah: 0,
@@ -360,8 +360,8 @@ class LatihanJepangApp {
   }
 
   gantiTab(tab) {
+    this.state.tabAktif = tab;
     if(!this.state.diKuis) {
-      this.state.tabAktif = tab;
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
       this.soalBaru();
@@ -388,6 +388,7 @@ class LatihanJepangApp {
   }
 
   berhenti() {
+    this.soalBaru();
     this.tampilkanPopup();
   }
 
@@ -398,6 +399,7 @@ class LatihanJepangApp {
   }
 
   tutupPopup() {
+    this.state.diKuis = false;
     this.popupSkor.classList.add('hidden');
     this.kembaliKeMode(); // langsung balik ke pilih mode
   }
