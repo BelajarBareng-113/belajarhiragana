@@ -1,65 +1,431 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Latihan Bahasa Jepang</title>
-  <link rel="stylesheet" href="assets/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latihan Bahasa Jepang</title>
+<style>
+  :root {
+    --bg: #f2f2f2;
+    --gray1: #8a8a8a;
+    --gray2: #bdbdbd;
+    --gray3: #e0e0e0;
+    --white: #fff;
+    --black: #000;
+    --green: #2e7d32;
+    --red: #c62828;
+  }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, Arial, sans-serif; }
+  body { background: var(--bg); padding: 16px; }
+
+ .container { max-width: 900px; margin: 0 auto; }
+
+ .header {
+    background: var(--gray1);
+    color: var(--black);
+    padding: 16px 20px;
+    border-radius: 10px;
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
+ .card {
+    background: var(--gray1);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+ .tabs { display: flex; gap: 4px; margin-bottom: -1px; flex-wrap: wrap; }
+ .tab {
+    padding: 10px 20px;
+    background: var(--gray2);
+    border: none;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    font-size: 16px;
+  }
+ .tab.active { background: var(--white); }
+
+ .content {
+    background: var(--white);
+    border-radius: 0 10px 10px 10px;
+    padding: 20px;
+  }
+
+ .layout { display: flex; gap: 20px; flex-wrap: wrap; }
+ .quiz-area { flex: 2; min-width: 280px; }
+ .mode-area { flex: 1; min-width: 240px; }
+
+ .char-box {
+    background: var(--gray3);
+    border-radius: 10px;
+    padding: 40px 20px;
+    display: flex; justify-content: center; align-items: center;
+    margin-bottom: 12px;
+  }
+ .char {
+    background: var(--white);
+    padding: 20px 40px;
+    font-size: clamp(32px, 10vw, 64px);
+    border-radius: 8px;
+    min-width: 120px;
+    text-align: center;
+  }
+
+ .btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+  }
+ .btn-stop { background: var(--gray2); margin-bottom: 8px; }
+ .btn-start { background: var(--gray3); }
+ .input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--black);
+    border-radius: 6px;
+    font-size: 16px;
+    text-transform: uppercase;
+  }
+
+ .mode-box {
+    background: var(--gray2);
+    padding: 16px;
+    border-radius: 10px;
+  }
+ .mode-title { font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid var(--black); padding-bottom: 6px;}
+ .radio { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+
+ .hidden { display: none!important; }
+
+  /* Popup */
+ .popup-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 10;
+  }
+ .popup {
+    background: var(--white); padding: 24px; border-radius: 12px;
+    text-align: center; min-width: 300px;
+  }
+ .popup h2 { margin-bottom: 16px; }
+ .score-row { display: flex; justify-content: space-around; margin: 16px 0; }
+ .score-item.label { font-size: 14px; color: #555; }
+ .score-item.value { font-size: 28px; font-weight: bold; }
+ .value.benar { color: var(--green); }
+ .value.salah { color: var(--red); }
+
+  @media(max-width: 640px){
+   .layout { flex-direction: column; }
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Latihan Bahasa Jepang</h1>
-    </header>
+<div class="container">
+  <div class="header">Latihan Bahasa Jepang</div>
 
-    <main class="card">
-      <nav class="tabs">
-        <button class="tab active" data-type="hiragana">Hiragana</button>
-      </nav>
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" data-tab="Hiragana">Hiragana</button>
+      <button class="tab" data-tab="Katakana">Katakana</button>
+      <!--<button class="tab" data-tab="Angka">Angka</button>
+      <button class="tab" data-tab="Kanji">Kanji</button>-->
+    </div>
 
-      <div class="content">
-        <div class="left-panel">
-          <div class="progress-bar">
-            <div class="progress" id="progress"></div>
-            <span class="badge green" id="benar">0</span>
-            <span class="badge red" id="salah">0</span>
-          </div>
-
-          <div class="question-box">
-            <div id="question" class="question">-</div>
-          </div>
-
-          <input type="text" id="answer" placeholder="Ketik romaji lalu Enter" autocomplete="off" disabled>
+    <div class="content">
+      <!-- HALAMAN MODE -->
+      <div id="modePage">
+        <div class="mode-box">
+          <div class="mode-title">Mode</div>
+          <label class="radio"><input type="radio" name="mode" value="Dasar" checked> Dasar</label>
+          <label class="radio"><input type="radio" name="mode" value="TentenMaru"> Tenten & Maru</label>
+          <label class="radio"><input type="radio" name="mode" value="Youon"> Youon</label>
+          <label class="radio"><input type="radio" name="mode" value="Lengkap"> Lengkap</label>
+          <button class="btn btn-start" id="btnMulai">Mulai</button>
         </div>
+      </div>
 
-        <div class="right-panel">
-          <div class="setting">
-            <label for="waktu">Waktu</label>
-            <select id="waktu">
-              <option value="60" selected>1 Menit</option>
-              <option value="120">2 Menit</option>
-              <option value="180">3 Menit</option>
-              <option value="240">4 Menit</option>
-              <option value="300">5 Menit</option>
-            </select>
-          </div>
-
-          <fieldset class="setting">
-            <legend>Mode</legend>
-            <label><input type="radio" name="mode" value="dasar" checked> Dasar</label>
-            <label><input type="radio" name="mode" value="tenten"> Tenten Maru</label>
-            <label><input type="radio" name="mode" value="youon"> Youon</label>
-          </fieldset>
-
-          <div class="buttons">
-            <button id="mulai">Mulai</button>
-            <button id="berhenti" disabled>Berhenti</button>
+      <!-- HALAMAN KUIS -->
+      <div id="quizPage" class="hidden">
+        <div class="layout">
+          <div class="quiz-area">
+            <div class="char-box">
+              <div class="char" id="charDisplay">-</div>
+            </div>
+            <button class="btn btn-stop" id="btnBerhenti">Berhenti</button>
+            <input type="text" class="input" id="inputJawaban" placeholder="Ketik romaji">
           </div>
         </div>
       </div>
-    </main>
+    </div>
   </div>
+</div>
 
-  <script src="assets/script.js"></script>
+<!-- POPUP SKOR -->
+<div id="popupSkor" class="popup-overlay hidden">
+  <div class="popup">
+    <h2>Hasil Latihan</h2>
+    <div class="score-row">
+      <div class="score-item">
+        <div class="label">Benar</div>
+        <div class="value benar" id="skorBenar">0</div>
+      </div>
+      <div class="score-item">
+        <div class="label">Salah</div>
+        <div class="value salah" id="skorSalah">0</div>
+      </div>
+    </div>
+    <button class="btn btn-start" id="btnTutupPopup">OK</button>
+  </div>
+</div>
+
+<script>
+class LatihanJepangApp {
+  constructor() {
+    this.data = {
+      Hiragana: {
+        Dasar: [
+        ['あ', 'a'], ['い', 'i'], ['う', 'u'], ['え', 'e'], ['お', 'o'],
+        [ 'か', 'ka'], ['き', 'ki'], ['く', 'ku'], ['け', 'ke'], ['こ', 'ko'],
+        [ 'さ', 'sa'], ['し', 'shi'], ['す', 'su'], ['せ', 'se'], ['そ', 'so'],
+        [ 'た', 'ta'], ['ち', 'chi'], ['つ', 'tsu'], ['て', 'te'], ['と', 'to'],
+        [ 'な', 'na'], ['に', 'ni'], ['ぬ', 'nu'], ['ね', 'ne'], ['の', 'no'],
+        [ 'は', 'ha'], ['ひ', 'hi'], ['ふ', 'fu'], ['へ', 'he'], ['ほ', 'ho'],
+        [ 'ま', 'ma'], ['み', 'mi'], ['む', 'mu'], ['め', 'me'], ['も', 'mo'],
+        [ 'や', 'ya'], ['ゆ', 'yu'], ['よ', 'yo'],
+        [ 'ら', 'ra'], ['り', 'ri'], ['る', 'ru'], ['れ', 're'], ['ろ', 'ro'],
+        [ 'わ', 'wa'], ['を', 'wo'], ['ん', 'n']
+        ],
+        TentenMaru: [
+        ['が','ga'], ['ぎ','gi'], ['ぐ','gu'], ['げ','ge'], ['ご','go'],
+        ['ざ','za'], ['じ','ji'], ['ず','zu'], ['ぜ','ze'], ['ぞ','zo'],
+        ['だ','da'], ['ぢ','ji'], ['づ','zu'], ['で','de'], ['ど','do'],
+        ['ば','ba'], ['び','bi'], ['ぶ','bu'], ['べ','be'], ['ぼ','bo'],
+        ['ぱ','pa'], ['ぴ','pi'], ['ぷ','pu'], ['ぺ','pe'], ['ぽ','po']
+        ],
+        Youon: [
+        ['きゃ','kya'], ['きゅ','kyu'], ['きょ','kyo'],
+        ['しゃ','sha'], ['しゅ','shu'], ['しょ','sho'],
+        ['ちゃ','cha'], ['ちゅ','chu'], ['ちょ','cho'],
+        ['にゃ','nya'], ['にゅ','nyu'], ['にょ','nyo'],
+        ['ひゃ','hya'], ['ひゅ','hyu'], ['ひょ','hyo'],
+        ['みゃ','mya'], ['みゅ','myu'], ['みょ','myo'],
+        ['りゃ','rya'], ['りゅ','ryu'], ['りょ','ryo'],
+        ['ぎゃ','gya'], ['ぎゅ','gyu'], ['ぎょ','gyo'],
+        ['じゃ','ja'], ['じゅ','ju'], ['じょ','jo'],
+        ['びゃ','bya'], ['びゅ','byu'], ['びょ','byo'],
+        ['ぴゃ','pya'], ['ぴゅ','pyu'], ['ぴょ','pyo']
+        ],
+        Lengkap: [
+        ['あ', 'a'], ['い', 'i'], ['う', 'u'], ['え', 'e'], ['お', 'o'],
+        ['か', 'ka'], ['き', 'ki'], ['く', 'ku'], ['け', 'ke'], ['こ', 'ko'],
+        ['さ', 'sa'], ['し', 'shi'], ['す', 'su'], ['せ', 'se'], ['そ', 'so'],
+        ['た', 'ta'], ['ち', 'chi'], ['つ', 'tsu'], ['て', 'te'], ['と', 'to'],
+        ['な', 'na'], ['に', 'ni'], ['ぬ', 'nu'], ['ね', 'ne'], ['の', 'no'],
+        ['は', 'ha'], ['ひ', 'hi'], ['ふ', 'fu'], ['へ', 'he'], ['ほ', 'ho'],
+        ['ま', 'ma'], ['み', 'mi'], ['む', 'mu'], ['め', 'me'], ['も', 'mo'],
+        ['や', 'ya'], ['ゆ', 'yu'], ['よ', 'yo'],
+        ['ら', 'ra'], ['り', 'ri'], ['る', 'ru'], ['れ', 're'], ['ろ', 'ro'],
+        ['わ', 'wa'], ['を', 'wo'], ['ん', 'n'],
+        ['が','ga'], ['ぎ','gi'], ['ぐ','gu'], ['げ','ge'], ['ご','go'],
+        ['ざ','za'], ['じ','ji'], ['ず','zu'], ['ぜ','ze'], ['ぞ','zo'],
+        ['だ','da'], ['ぢ','ji'], ['づ','zu'], ['で','de'], ['ど','do'],
+        ['ば','ba'], ['び','bi'], ['ぶ','bu'], ['べ','be'], ['ぼ','bo'],
+        ['ぱ','pa'], ['ぴ','pi'], ['ぷ','pu'], ['ぺ','pe'], ['ぽ','po'],
+        ['きゃ','kya'], ['きゅ','kyu'], ['きょ','kyo'],
+        ['しゃ','sha'], ['しゅ','shu'], ['しょ','sho'],
+        ['ちゃ','cha'], ['ちゅ','chu'], ['ちょ','cho'],
+        ['にゃ','nya'], ['にゅ','nyu'], ['にょ','nyo'],
+        ['ひゃ','hya'], ['ひゅ','hyu'], ['ひょ','hyo'],
+        ['みゃ','mya'], ['みゅ','myu'], ['みょ','myo'],
+        ['りゃ','rya'], ['りゅ','ryu'], ['りょ','ryo'],
+        ['ぎゃ','gya'], ['ぎゅ','gyu'], ['ぎょ','gyo'],
+        ['じゃ','ja'], ['じゅ','ju'], ['じょ','jo'],
+        ['びゃ','bya'], ['びゅ','byu'], ['びょ','byo'],
+        ['ぴゃ','pya'], ['ぴゅ','pyu'], ['ぴょ','pyo']
+        ]
+      },
+      Katakana: {
+        Dasar: [
+        ['ア', 'a'], ['イ', 'i'], ['ウ', 'u'], ['エ', 'e'], ['オ', 'o'],
+        ['カ', 'ka'], ['キ', 'ki'], ['ク', 'ku'], ['ケ', 'ke'], ['コ', 'ko'],
+        ['サ', 'sa'], ['シ', 'shi'], ['ス', 'su'], ['セ', 'se'], ['ソ', 'so'],
+        ['タ', 'ta'], ['チ', 'chi'], ['ツ', 'tsu'], ['テ', 'te'], ['ト', 'to'],
+        ['ナ', 'na'], ['ニ', 'ni'], ['ヌ', 'nu'], ['ネ', 'ne'], ['ノ', 'no'],
+        ['ハ', 'ha'], ['ヒ', 'hi'], ['フ', 'fu'], ['ヘ', 'he'], ['ホ', 'ho'],
+        ['マ', 'ma'], ['ミ', 'mi'], ['ム', 'mu'], ['メ', 'me'], ['モ', 'mo'],
+        ['ヤ', 'ya'], ['ユ', 'yu'], ['ヨ', 'yo'],
+        ['ラ', 'ra'], ['リ', 'ri'], ['ル', 'ru'], ['レ', 're'], ['ロ', 'ro'],
+        ['ワ', 'wa'], ['ヲ', 'wo'], ['ン', 'n']
+        ],
+        TentenMaru: [
+        ['ガ', 'ga'], ['ギ', 'gi'], ['グ', 'gu'], ['ゲ', 'ge'], ['ゴ', 'go'],
+        ['ザ', 'za'], ['ジ', 'ji'], ['ズ', 'zu'], ['ゼ', 'ze'], ['ゾ', 'zo'],
+        ['ダ', 'da'], ['ヂ', 'ji'], ['ヅ', 'zu'], ['デ', 'de'], ['ド', 'do'],
+        ['バ', 'ba'], ['ビ', 'bi'], ['ブ', 'bu'], ['ベ', 'be'], ['ボ', 'bo'],
+        ['パ', 'pa'], ['ピ', 'pi'], ['プ', 'pu'], ['ペ', 'pe'], ['ポ', 'po']
+        ],
+        Youon: [
+        ['キャ', 'kya'], ['キュ', 'kyu'], ['キョ', 'kyo'],
+        ['シャ', 'sha'], ['シュ', 'shu'], ['ショ', 'sho'],
+        ['チャ', 'cha'], ['チュ', 'chu'], ['チョ', 'cho'],
+        ['ニャ', 'nya'], ['ニュ', 'nyu'], ['ニョ', 'nyo'],
+        ['ヒャ', 'hya'], ['ヒュ', 'hyu'], ['ヒョ', 'hyo'],
+        ['ミャ', 'mya'], ['ミュ', 'myu'], ['ミョ', 'myo'],
+        ['リャ', 'rya'], ['リュ', 'ryu'], ['リョ', 'ryo'],
+        ['ギャ', 'gya'], ['ギュ', 'gyu'], ['ギョ', 'gyo'],
+        ['ジャ', 'ja'], ['ジュ', 'ju'], ['ジョ', 'jo'],
+        ['ビャ', 'bya'], ['ビュ', 'byu'], ['ビョ', 'byo'],
+        ['ピャ', 'pya'], ['ピュ', 'pyu'], ['ピョ', 'pyo']
+        ],
+        Lengkap: [
+        ['ア', 'a'], ['イ', 'i'], ['ウ', 'u'], ['エ', 'e'], ['オ', 'o'],
+        ['カ', 'ka'], ['キ', 'ki'], ['ク', 'ku'], ['ケ', 'ke'], ['コ', 'ko'],
+        ['サ', 'sa'], ['シ', 'shi'], ['ス', 'su'], ['セ', 'se'], ['ソ', 'so'],
+        ['タ', 'ta'], ['チ', 'chi'], ['ツ', 'tsu'], ['テ', 'te'], ['ト', 'to'],
+        ['ナ', 'na'], ['ニ', 'ni'], ['ヌ', 'nu'], ['ネ', 'ne'], ['ノ', 'no'],
+        ['ハ', 'ha'], ['ヒ', 'hi'], ['フ', 'fu'], ['ヘ', 'he'], ['ホ', 'ho'],
+        ['マ', 'ma'], ['ミ', 'mi'], ['ム', 'mu'], ['メ', 'me'], ['モ', 'mo'],
+        ['ヤ', 'ya'], ['ユ', 'yu'], ['ヨ', 'yo'],
+        ['ラ', 'ra'], ['リ', 'ri'], ['ル', 'ru'], ['レ', 're'], ['ロ', 'ro'],
+        ['ワ', 'wa'], ['ヲ', 'wo'], ['ン', 'n'],
+        ['ガ', 'ga'], ['ギ', 'gi'], ['グ', 'gu'], ['ゲ', 'ge'], ['ゴ', 'go'],
+        ['ザ', 'za'], ['ジ', 'ji'], ['ズ', 'zu'], ['ゼ', 'ze'], ['ゾ', 'zo'],
+        ['ダ', 'da'], ['ヂ', 'ji'], ['ヅ', 'zu'], ['デ', 'de'], ['ド', 'do'],
+        ['バ', 'ba'], ['ビ', 'bi'], ['ブ', 'bu'], ['ベ', 'be'], ['ボ', 'bo'],
+        ['パ', 'pa'], ['ピ', 'pi'], ['プ', 'pu'], ['ペ', 'pe'], ['ポ', 'po'],
+        ['キャ', 'kya'], ['キュ', 'kyu'], ['キョ', 'kyo'],
+        ['シャ', 'sha'], ['シュ', 'shu'], ['ショ', 'sho'],
+        ['チャ', 'cha'], ['チュ', 'chu'], ['チョ', 'cho'],
+        ['ニャ', 'nya'], ['ニュ', 'nyu'], ['ニョ', 'nyo'],
+        ['ヒャ', 'hya'], ['ヒュ', 'hyu'], ['ヒョ', 'hyo'],
+        ['ミャ', 'mya'], ['ミュ', 'myu'], ['ミョ', 'myo'],
+        ['リャ', 'rya'], ['リュ', 'ryu'], ['リョ', 'ryo'],
+        ['ギャ', 'gya'], ['ギュ', 'gyu'], ['ギョ', 'gyo'],
+        ['ジャ', 'ja'], ['ジュ', 'ju'], ['ジョ', 'jo'],
+        ['ビャ', 'bya'], ['ビュ', 'byu'], ['ビョ', 'byo'],
+        ['ピャ', 'pya'], ['ピュ', 'pyu'], ['ピョ', 'pyo']
+        ]
+      },
+      Angka: { Lengkap: [['一','ichi'],['二','ni'],['三','san'],['四','yon']] },
+      Kanji: { Lengkap: [['日','hi'],['月','tsuki'],['人','hito']] }
+    };
+
+    this.state = {
+      tabAktif: 'Hiragana',
+      modeAktif: 'Lengkap',
+      diKuis: false,
+      benar: 0,
+      salah: 0,
+      jawabanBenar: ''
+    };
+
+    this.initElements();
+    this.initEvents();
+    this.soalBaru();
+  }
+
+  initElements() {
+    this.modePage = document.getElementById('modePage');
+    this.quizPage = document.getElementById('quizPage');
+    this.charDisplay = document.getElementById('charDisplay');
+    this.inputJawaban = document.getElementById('inputJawaban');
+    this.modeAktifSpan = document.getElementById('modeAktif');
+    this.popupSkor = document.getElementById('popupSkor');
+    this.skorBenar = document.getElementById('skorBenar');
+    this.skorSalah = document.getElementById('skorSalah');
+  }
+
+  initEvents() {
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', (e) => this.gantiTab(e.target.dataset.tab));
+    });
+
+    document.getElementById('btnMulai').addEventListener('click', () => this.mulai());
+    document.getElementById('btnBerhenti').addEventListener('click', () => this.berhenti());
+    document.getElementById('btnTutupPopup').addEventListener('click', () => this.tutupPopup());
+
+    this.inputJawaban.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter') this.cekJawaban();
+    });
+
+    document.querySelectorAll('input[name="mode"]').forEach(r => {
+      r.addEventListener('change', (e) => this.state.modeAktif = e.target.value);
+    });
+  }
+
+  gantiTab(tab) {
+    if(!this.state.diKuis) {
+      this.state.tabAktif = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+      this.soalBaru();
+    }
+  }
+
+  mulai() {
+    const modeDipilih = document.querySelector('input[name="mode"]:checked').value;
+    this.state.modeAktif = modeDipilih;
+    this.state.diKuis = true;
+    this.state.benar = 0;
+    this.state.salah = 0;
+
+    this.modePage.classList.add('hidden');
+    this.quizPage.classList.remove('hidden');
+    this.modeAktifSpan.textContent = this.state.modeAktif;
+    this.soalBaru();
+    this.inputJawaban.focus();
+  }
+
+  kembaliKeMode() {
+    this.quizPage.classList.add('hidden');
+    this.modePage.classList.remove('hidden');
+  }
+
+  berhenti() {
+    this.tampilkanPopup();
+  }
+
+  tampilkanPopup() {
+    this.skorBenar.textContent = this.state.benar;
+    this.skorSalah.textContent = this.state.salah;
+    this.popupSkor.classList.remove('hidden');
+  }
+
+  tutupPopup() {
+    this.popupSkor.classList.add('hidden');
+    this.kembaliKeMode(); // langsung balik ke pilih mode
+  }
+
+  soalBaru() {
+    const bank = this.data[this.state.tabAktif]?.[this.state.modeAktif] || this.data[this.state.tabAktif].Lengkap;
+    const soal = bank[Math.floor(Math.random() * bank.length)];
+    this.charDisplay.textContent = soal[0];
+    this.state.jawabanBenar = soal[1].toLowerCase();
+    this.inputJawaban.value = '';
+  }
+
+  cekJawaban() {
+    const jawaban = this.inputJawaban.value.trim().toLowerCase();
+    if(jawaban === '') return;
+
+    if(jawaban === this.state.jawabanBenar) {
+      this.state.benar++;
+    } else {
+      this.state.salah++;
+    }
+    this.soalBaru();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  new LatihanJepangApp();
+});
+</script>
 </body>
 </html>
